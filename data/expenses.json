@@ -1,0 +1,5 @@
+[
+  { "id": 1692837402001, "expense_date": "2024-04-10", "category": "Rent", "description": "April Rent Payment", "amount": 20000, "account_id": 1692837401001, "account_name": "Cash on Hand" },
+  { "id": 1692837402002, "expense_date": "2024-04-12", "category": "Utilities", "description": "Electricity Bill", "amount": 2500, "account_id": 1692837401002, "account_name": "Bank Account" },
+  { "id": 1692837402003, "expense_date": "2024-04-15", "category": "Marketing", "description": "Facebook Ads", "amount": 5000, "account_id": 1692837401002, "account_name": "Bank Account" }
+]

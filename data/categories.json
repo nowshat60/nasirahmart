@@ -1,0 +1,8 @@
+[
+  { "id": 1, "name": "Electronics", "slug": "electronics", "status": "active", "image": "https://images.unsplash.com/photo-1498049794561-7780e7231661?w=800&q=80" },
+  { "id": 2, "name": "Fashion", "slug": "fashion", "status": "active", "image": "https://images.unsplash.com/photo-1445205170230-053b83016050?w=800&q=80" },
+  { "id": 3, "name": "Home & Living", "slug": "home-living", "status": "active", "image": "https://images.unsplash.com/photo-1484101403633-562f65bd89aa?w=800&q=80" },
+  { "id": 4, "name": "Groceries", "slug": "groceries", "status": "active", "image": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80" },
+  { "id": 5, "name": "Beauty & Health", "slug": "beauty-health", "status": "active", "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=800&q=80" },
+  { "id": 6, "name": "Sports & Outdoors", "slug": "sports-outdoors", "status": "active", "image": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&q=80" }
+]

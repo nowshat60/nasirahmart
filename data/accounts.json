@@ -1,0 +1,11 @@
+[
+  { "id": 1692837401001, "code": "1001", "name": "Cash on Hand", "type": "Asset", "balance": 50000 },
+  { "id": 1692837401002, "code": "1002", "name": "Bank Account", "type": "Asset", "balance": 250000 },
+  { "id": 1692837401003, "code": "1200", "name": "Accounts Receivable", "type": "Asset", "balance": 15000 },
+  { "id": 1692837401004, "code": "1400", "name": "Inventory", "type": "Asset", "balance": 450000 },
+  { "id": 1692837401005, "code": "2000", "name": "Accounts Payable", "type": "Liability", "balance": 5000 },
+  { "id": 1692837401006, "code": "3000", "name": "Owner's Equity", "type": "Equity", "balance": 760000 },
+  { "id": 1692837401007, "code": "4000", "name": "Sales Revenue", "type": "Revenue", "balance": 120000 },
+  { "id": 1692837401008, "code": "5000", "name": "Cost of Goods Sold", "type": "Expense", "balance": 80000 },
+  { "id": 1692837401009, "code": "6000", "name": "Rent Expense", "type": "Expense", "balance": 20000 }
+]
