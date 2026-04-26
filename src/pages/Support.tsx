@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, ChevronDown, MessageCircle, Send, X, User, Headset, HelpCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 interface FAQ {
   id: string;

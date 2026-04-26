@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Wrench, ShieldCheck, Hammer, Clock, CheckCircle2, X, Calendar, User, Phone, MapPin } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 interface Service {
   id: string;

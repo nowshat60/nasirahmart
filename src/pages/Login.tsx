@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Mail, Lock, ArrowRight, Github, Chrome } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 export const Login: React.FC = () => {
   const { t } = useTranslation();

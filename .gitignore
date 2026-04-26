@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+.env
+node_modules
+dist
+*.json (jodi shete sensitive hoy)

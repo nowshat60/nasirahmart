@@ -30,4 +30,16 @@ if($result->num_rows > 0){
     http_response_code(404);
     echo json_encode(array("message" => "No inventory found."));
 }
+$res = $conn->query("SELECT * FROM products ORDER BY stock_quantity ASC");
+$items = [];
+$stats = ['totalItems' => 0, 'lowStock' => 0, 'totalValue' => 0];
+
+while($row = $res->fetch_assoc()) {
+    $items[] = $row;
+    $stats['totalItems']++;
+    if($row['stock_quantity'] < 10) $stats['lowStock']++;
+    $stats['totalValue'] += ($row['stock_quantity'] * $row['price']);
+}
+
+echo json_encode(['items' => $items, 'stats' => $stats]);
 ?>

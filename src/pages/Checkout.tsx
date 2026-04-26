@@ -11,7 +11,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { cn } from '../lib/utils';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 type CheckoutStep = 'shipping' | 'payment' | 'confirmation' | 'success';
 

@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { InventoryDashboard } from "./inventory/InventoryDashboard";
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthProvider } from './context/AuthContext';
@@ -12,6 +13,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { Navbar } from './components/Navbar';
+import { SupplierManagement } from "./pages/SupplierManagement";
 import { Helpline } from './components/Helpline';
 import { LiveChat } from './components/LiveChat';
 import { Home } from './pages/Home';
@@ -24,7 +26,6 @@ import { DashboardHome } from './dashboard/DashboardHome';
 import { Products } from './dashboard/Products';
 import { Categories } from './dashboard/Categories';
 import { OrderManagement } from './orders/OrderManagement';
-import { AccountingDashboard } from './finance/AccountingDashboard';
 import { ChartOfAccounts } from './finance/ChartOfAccounts';
 import { CustomerManagement } from './customer/CustomerManagement';
 import { InventoryManagement } from './inventory/InventoryManagement';
@@ -47,9 +48,10 @@ import { Deals } from './pages/Deals';
 import { GiftCards } from './pages/GiftCards';
 import { Sell } from './pages/Sell';
 import { Services } from './pages/Services';
+import { AccountingDashboard } from './finance/AccountingDashboard';
 import { Support } from './pages/Support';
 import { useAuth } from './context/AuthContext';
-
+import { Payroll } from './pages/Payroll'; // Or wherever your Payroll file is
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -198,7 +200,9 @@ export default function App() {
                   <Route path="/sell" element={<PublicLayout><Sell /></PublicLayout>} />
                   <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
                   <Route path="/support" element={<PublicLayout><Support /></PublicLayout>} />
-                  
+                  <Route path="/admin/pages/payroll" element={<Payroll />} />
+                  <Route path="/admin/inventory" element={<InventoryDashboard />} />
+                  <Route path="/admin/suppliers" element={<SupplierManagement />} />
                   {/* Admin Routes */}
                   <Route path="/admin" element={<AdminLayout><DashboardHome /></AdminLayout>} />
                   <Route path="/admin/products" element={<AdminLayout><Products /></AdminLayout>} />
@@ -215,6 +219,7 @@ export default function App() {
                   <Route path="/admin/reports" element={<AdminLayout><Reports /></AdminLayout>} />
                   <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
                   <Route path="/admin/settings" element={<AdminLayout><Settings /></AdminLayout>} />
+                  <Route path="/admin/finance" element={<AccountingDashboard />} />
                 </Routes>
               </Router>
             </WishlistProvider>

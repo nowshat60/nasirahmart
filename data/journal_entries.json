@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2026-04-26",
+    "reference": "JV-665",
+    "description": "cfgdgh",
+    "status": "Posted",
+    "items": [
+      {
+        "account_id": "1692837401009",
+        "debit": 3,
+        "credit": 3
+      },
+      {
+        "account_id": "1692837401008",
+        "debit": -1,
+        "credit": -1
+      }
+    ],
+    "amount": 2,
+    "id": 1777190275455,
+    "createdAt": "2026-04-26T07:57:55.455Z"
+  }
+]

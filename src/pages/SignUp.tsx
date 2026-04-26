@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Mail, Lock, User, ArrowRight, Chrome } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 export const SignUp: React.FC = () => {
   const { t } = useTranslation();

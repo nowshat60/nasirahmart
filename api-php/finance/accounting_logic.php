@@ -11,80 +11,46 @@ class Accounting {
         $this->conn = $db;
     }
 
-    /**
-     * Create a Journal Entry with Transactions (Double-Entry)
-     */
-    public function createEntry($date, $description, $refType, $refId, $transactions) {
-        $this->conn->begin_transaction();
-        try {
-            // 1. Insert Journal Entry
-            $query = "INSERT INTO journal_entries (entry_date, description, reference_type, reference_id) VALUES (?, ?, ?, ?)";
-            $stmt = $this->conn->prepare($query);
-            $stmt->bind_param("sssi", $date, $description, $refType, $refId);
-            $stmt->execute();
-            $entryId = $this->conn->insert_id;
+    // Pro-level Journal Entry with Voucher Generation
+   // Existing class er bhetor createEntry function ta modify koro
+public function createEntry($date, $description, $refType, $refId, $transactions) {
+    $this->conn->begin_transaction();
+    try {
+        // Voucher Number Generation logic
+        $vQuery = "SELECT COUNT(id) as total FROM journal_entries WHERE YEAR(entry_date) = YEAR(?)";
+        $vStmt = $this->conn->prepare($vQuery);
+        $vStmt->bind_param("s", $date);
+        $vStmt->execute();
+        $result = $vStmt->get_result()->fetch_assoc();
+        $vNo = "JV-" . date('Y', strtotime($date)) . "-" . str_pad($result['total'] + 1, 4, '0', STR_PAD_LEFT);
 
-            // 2. Insert Transactions (Debits and Credits)
-            $totalDebit = 0;
-            $totalCredit = 0;
+        // Insert Master Entry
+        $query = "INSERT INTO journal_entries (voucher_no, entry_date, description, reference_type, reference_id) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("ssssi", $vNo, $date, $description, $refType, $refId);
+        $stmt->execute();
+        $entryId = $this->conn->insert_id;
 
-            foreach ($transactions as $tx) {
-                $txQuery = "INSERT INTO transactions (journal_entry_id, account_id, debit, credit) VALUES (?, ?, ?, ?)";
-                $txStmt = $this->conn->prepare($txQuery);
-                $txStmt->bind_param("iidd", $entryId, $tx['account_id'], $tx['debit'], $tx['credit']);
-                $txStmt->execute();
+        // Insert Transactions and Update Account Balances
+        foreach ($transactions as $tx) {
+            $txQuery = "INSERT INTO transactions (journal_entry_id, account_id, debit, credit) VALUES (?, ?, ?, ?)";
+            $txStmt = $this->conn->prepare($txQuery);
+            $txStmt->bind_param("iidd", $entryId, $tx['account_id'], $tx['debit'], $tx['credit']);
+            $txStmt->execute();
 
-                // Update Account Balance
-                $balanceUpdate = ($tx['debit'] > 0) ? "balance = balance + ?" : "balance = balance - ?";
-                $balanceAmount = ($tx['debit'] > 0) ? $tx['debit'] : $tx['credit'];
-                
-                // Note: Balance logic depends on account type (Asset/Expense: Debit+, Liability/Equity/Revenue: Credit+)
-                // For simplicity, we just store raw balance and handle logic in reports
-                $accUpdate = "UPDATE accounts SET balance = balance + (? - ?) WHERE id = ?";
-                $accStmt = $this->conn->prepare($accUpdate);
-                $accStmt->bind_param("ddi", $tx['debit'], $tx['credit'], $tx['account_id']);
-                $accStmt->execute();
-
-                $totalDebit += $tx['debit'];
-                $totalCredit += $tx['credit'];
-            }
-
-            // 3. Verify Trial Balance (Debits == Credits)
-            if (abs($totalDebit - $totalCredit) > 0.001) {
-                throw new Exception("Trial balance mismatch: Debits ($totalDebit) != Credits ($totalCredit)");
-            }
-
-            $this->conn->commit();
-            return $entryId;
-        } catch (Exception $e) {
-            $this->conn->rollback();
-            throw $e;
+            // Real-time Balance Update (Essential for Trial Balance)
+            $updateAcc = "UPDATE accounts SET balance = balance + ? - ? WHERE id = ?";
+            $upStmt = $this->conn->prepare($updateAcc);
+            $upStmt->bind_param("ddi", $tx['debit'], $tx['credit'], $tx['account_id']);
+            $upStmt->execute();
         }
+
+        $this->conn->commit();
+        return ["status" => "success", "voucher_no" => $vNo, "id" => $entryId];
+    } catch (Exception $e) {
+        $this->conn->rollback();
+        throw $e;
     }
-
-    /**
-     * Automated Journal Entry for a Sale
-     */
-    public function recordSale($orderId, $total, $costOfGoods, $paymentMethod) {
-        // Accounts (Assuming IDs from schema insert)
-        $cashAcc = 2; // Cash
-        $arAcc = 3;   // Accounts Receivable
-        $inventoryAcc = 4; // Inventory
-        $revenueAcc = 9;   // Sales Revenue
-        $cogsAcc = 11;     // COGS
-
-        $debitAcc = ($paymentMethod === 'COD') ? $arAcc : $cashAcc;
-
-        $transactions = [
-            // Revenue Entry
-            ['account_id' => $debitAcc, 'debit' => $total, 'credit' => 0],
-            ['account_id' => $revenueAcc, 'debit' => 0, 'credit' => $total],
-            // Inventory/COGS Entry
-            ['account_id' => $cogsAcc, 'debit' => $costOfGoods, 'credit' => 0],
-            ['account_id' => $inventoryAcc, 'debit' => 0, 'credit' => $costOfGoods]
-        ];
-
-        return $this->createEntry(date('Y-m-d'), "Sale recorded for Order #$orderId", 'Order', $orderId, $transactions);
-    }
+}
 }
 ?>

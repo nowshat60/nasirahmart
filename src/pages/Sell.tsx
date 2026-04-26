@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Store, Upload, User, Building2, MapPin, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import axios from 'axios';
+import axios from '../axios/AxiosInstance';
 
 export const Sell: React.FC = () => {
   const { showToast } = useToast();

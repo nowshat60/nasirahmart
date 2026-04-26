@@ -30,54 +30,35 @@ export const FinancialStatements = () => {
     trial: [],
     totals: { revenue: 0, expenses: 0, netProfit: 0, assets: 0, liabilities: 0, equity: 0 }
   });
+// Line 35 theke shuru koro
   const reportRef = useRef(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [summaryRes, accountsRes] = await Promise.all([
-        axios.get('/api/finance/summary'),
-        axios.get('/api/accounts')
-      ]);
-
-      const { orders, expenses, totalAssets, totalLiabilities, totalEquity } = summaryRes.data || {};
-      const accounts = Array.isArray(accountsRes.data) ? accountsRes.data : [];
-
-      // Group by month for chart
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      const monthlyData = {};
+      const res = await axios.get(`http://localhost/nasirah-mart/api-php/finance/get_statements.php?start=${dateRange.start}&end=${dateRange.end}`);
       
-      (Array.isArray(orders) ? orders : []).forEach(order => {
-        const date = new Date(order.createdAt);
-        const month = months[date.getMonth()];
-        if (!monthlyData[month]) monthlyData[month] = { name: month, revenue: 0, expenses: 0 };
-        monthlyData[month].revenue += order.totalAmount || 0;
-      });
+      // Ensure the data structure matches what the UI expects
+      const { pnl, balance, trial, totals, orders, expenses, accounts, totalAssets, totalLiabilities, totalEquity } = res.data;
 
-      (Array.isArray(expenses) ? expenses : []).forEach(exp => {
-        const date = new Date(exp.expense_date);
-        const month = months[date.getMonth()];
-        if (!monthlyData[month]) monthlyData[month] = { name: month, revenue: 0, expenses: 0 };
-        monthlyData[month].expenses += exp.amount || 0;
-      });
-
+      // Logic to calculate totals if the API doesn't provide them directly
       const totalRevenue = (Array.isArray(orders) ? orders : []).reduce((sum, o) => sum + (o.totalAmount || 0), 0);
       const totalExps = (Array.isArray(expenses) ? expenses : []).reduce((sum, e) => sum + (e.amount || 0), 0);
 
       setData({
-        pnl: Object.values(monthlyData),
-        balance: [
+        pnl: pnl || [],
+        balance: balance || [
           { name: 'Assets', value: totalAssets || 0 },
           { name: 'Liabilities', value: totalLiabilities || 0 },
           { name: 'Equity', value: totalEquity || 0 }
         ],
-        trial: accounts.map(a => ({
+        trial: trial || (Array.isArray(accounts) ? accounts.map(a => ({
           code: a.code,
           name: a.name,
           dr: a.type === 'Asset' || a.type === 'Expense' ? (a.balance || 0) : 0,
           cr: a.type === 'Liability' || a.type === 'Equity' || a.type === 'Revenue' ? (a.balance || 0) : 0
-        })),
-        totals: {
+        })) : []),
+        totals: totals || {
           revenue: totalRevenue,
           expenses: totalExps,
           netProfit: totalRevenue - totalExps,
@@ -92,6 +73,10 @@ export const FinancialStatements = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [dateRange]); // Removed activeTab to prevent unnecessary re-fetches when just switching tabs
 
   useEffect(() => {
     fetchData();
