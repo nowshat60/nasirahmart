@@ -13,6 +13,7 @@ import { WishlistProvider } from './context/WishlistContext';
 import { ToastProvider } from './context/ToastContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { Navbar } from './components/Navbar';
+import { Payroll } from './pages/Payroll'; // আপনার ফাইলের সঠিক পাথ দিন
 import { SupplierManagement } from "./pages/SupplierManagement";
 import { Helpline } from './components/Helpline';
 import { LiveChat } from './components/LiveChat';
@@ -51,7 +52,6 @@ import { Services } from './pages/Services';
 import { AccountingDashboard } from './finance/AccountingDashboard';
 import { Support } from './pages/Support';
 import { useAuth } from './context/AuthContext';
-import { Payroll } from './pages/Payroll'; // Or wherever your Payroll file is
 const ProtectedRoute = ({ children, requireAdmin = false }: { children: React.ReactNode, requireAdmin?: boolean }) => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();

@@ -25,27 +25,44 @@ interface Order {
 export const AdminDashboard: React.FC = () => {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'orders' | 'invoices'>('orders');
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [summary, setSummary] = useState<SummaryData | null>(null);
-  const [loading, setLoading] = useState(true);
+ const [orders, setOrders] = useState<Order[]>([]);
+const [summary, setSummary] = useState<SummaryData | null>(null);
+const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch('/api/admin/summary');
-        const data = await response.json();
-        
-        setOrders(data.orders || []);
-        setSummary(data.stats || null);
-      } catch (error) {
-        console.error("Error fetching admin summary:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const res = await fetch(
+        'http://localhost/nasirah-mart/api-php/orders/get_all_orders.php'
+      );
 
+      const ordersData = await res.json();
+
+      console.log('Fetched Orders:', ordersData);
+
+      setOrders(Array.isArray(ordersData) ? ordersData : []);
+
+      setSummary({
+        total_sales: ordersData.reduce(
+          (sum: number, o: any) => sum + Number(o.total_amount || 0),
+          0
+        ),
+        total_orders: ordersData.length,
+        total_customers: new Set(
+          ordersData.map((o: any) => o.user_name)
+        ).size,
+        inventory_value: 0,
+        low_stock_count: 0
+      });
+    } catch (error) {
+      console.error('Error fetching admin orders:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []);
   const stats = [
     { label: t('admin.total_revenue'), value: summary ? `${t('product.price')} ${(summary.total_sales || 0).toLocaleString()}` : `${t('product.price')} 0`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
     { label: t('admin.total_orders'), value: summary ? summary.total_orders.toString() : '0', icon: ShoppingCart, color: 'text-blue-500', bg: 'bg-blue-50' },
