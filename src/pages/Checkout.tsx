@@ -190,70 +190,50 @@ export const Checkout: React.FC = () => {
     }
   };
 
-  const handlePlaceOrder = async () => {
-    setLoading(true);
+  // In Checkout.tsx - Updated handlePlaceOrder function
+const handlePlaceOrder = async () => {
+  if (!isAuthenticated) {
+    showToast('Please login to place order', 'error');
+    return;
+  }
 
-    try {
-      const orderData = {
-  customer_id: user?.id,
-  customer_name: shippingDetails.fullName,
-  cart_items: cart,
-  subtotal: cartTotal,
-  tax: tax,
-  total_amount: grandTotal,
-  payment_method: paymentMethod
-};
+  setIsProcessing(true);
+  try {
+    // ✅ Standardized payload naming
+    const orderData = {
+      customer_id: user?.id,
+      customer_name: shippingDetails.fullName,
+      cart_items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity
+      })),
+      subtotal: cartTotal,
+      tax: tax,
+      shipping_fee: shippingFee,
+      total_amount: grandTotal,        // ✅ Send as 'total_amount' (matches PHP expectation)
+      payment_method: paymentMethod,
+      shipping_address: `${shippingDetails.address}, ${shippingDetails.city}, ${shippingDetails.zipCode}`,
+      phone: shippingDetails.phone
+    };
 
-      const response =
-        await axios.post(
-          'orders/place_order.php',
-          orderData
-        );
+    const response = await axios.post('/orders/place_order.php', orderData);
 
-      if (
-        response.data.status ===
-        'success'
-      ) {
-        setOrderInfo({
-          id:
-            response.data.order_id ||
-            'N/A',
-
-          deliveryDate:
-            '3-5 Business Days'
-        });
-
-        clearCart();
-
-        setStep('success');
-
-        setShowGateway(false);
-
-        showToast(
-          'Order placed successfully!',
-          'success'
-        );
-      } else {
-        throw new Error(
-          response.data.message ||
-            'Failed to place order'
-        );
-      }
-    } catch (error: any) {
-  console.log('FULL ERROR:', error);
-  console.log('RESPONSE:', error.response);
-  console.log('DATA:', error.response?.data);
-
-  showToast(
-    error.response?.data?.message ||
-    JSON.stringify(error.response?.data) ||
-    'Server connection failed',
-    'error'
-  );
-} finally {
-      setLoading(false);
+    if (response.data.success) {
+      setStep('success');
+      setTimeout(() => clearCart(), 500);
+      showToast('Order placed successfully!', 'success');
+    } else {
+      showToast(response.data.message || 'Error placing order', 'error');
     }
-  };
+  } catch (error) {
+    console.error('Order Error:', error);
+    showToast('Server connection failed!', 'error');
+  } finally {
+    setIsProcessing(false);
+  }
+};
     const handleGatewaySubmit = () => {
     if (gatewayStep === 'number') {
       if (!gatewayData.number) {
