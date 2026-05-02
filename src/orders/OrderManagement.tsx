@@ -41,22 +41,30 @@ export const OrderManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  useEffect(() => {
+  fetchOrders();
+}, []);
 
   const fetchOrders = async () => {
-    try {
-      // ✅ Fetch from standardized endpoint
-      const response = await axios.get('http://localhost/nasirah-mart/api-php/orders/get_all_orders.php');
-      setOrders(response.data || []);
-    } catch (error) {
-      console.error('Fetch error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    setLoading(true);
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
+    const res = await fetch(
+      'http://localhost/nasirah-mart/api-php/orders/get_all_orders.php'
+    );
+
+    const data = await res.json();
+
+    console.log('Fetched Orders:', data);
+
+    setOrders(Array.isArray(data) ? data : []);
+  } catch (err) {
+    console.error(err);
+    setOrders([]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleUpdateStatus = async (orderId: number, newStatus: string) => {
     try {
@@ -76,7 +84,90 @@ export const OrderManagement = () => {
       alert("Server error!");
     }
   };
+const printInvoice = (order: Order) => {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
 
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>Invoice ${order.order_number}</title>
+        <style>
+          body{
+            font-family: Arial;
+            padding:40px;
+            color:#111;
+          }
+          .header{
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:30px;
+          }
+          .box{
+            border:1px solid #ddd;
+            padding:15px;
+            border-radius:10px;
+            margin-top:20px;
+          }
+          table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:20px;
+          }
+          th,td{
+            border:1px solid #ddd;
+            padding:10px;
+            text-align:left;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Nasirah Mart Invoice</h1>
+          <h3>${order.order_number}</h3>
+        </div>
+
+        <div class="box">
+          <p><strong>Customer:</strong> ${order.customer_name}</p>
+          <p><strong>Email:</strong> ${order.customer_email}</p>
+          <p><strong>Phone:</strong> ${order.customer_phone}</p>
+          <p><strong>Address:</strong> ${order.customer_address}</p>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${order.items.map(item => `
+              <tr>
+                <td>${item.name}</td>
+                <td>${item.quantity}</td>
+                <td>৳${item.price}</td>
+                <td>৳${item.subtotal}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+
+        <div class="box">
+          <p>Subtotal: ৳${order.subtotal}</p>
+          <p>Tax: ৳${order.tax}</p>
+          <p>Shipping: ৳${order.shipping_fee}</p>
+          <h2>Total: ৳${order.total_amount}</h2>
+        </div>
+      </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+  printWindow.print();
+};
   const getStatusStyle = (status: string) => {
     const styles: Record<string, string> = {
       delivered: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -177,6 +268,43 @@ export const OrderManagement = () => {
                     <button onClick={() => setSelectedOrder(order)} className="p-2 text-slate-400 hover:text-blue-600 rounded-lg">
                       <Eye className="w-4 h-4" />
                     </button>
+                    <div className="flex items-center justify-end gap-2">
+  {/* Mark Shipped */}
+  <button
+    onClick={() => handleUpdateStatus(order.id, 'shipped')}
+    className="p-2 text-slate-400 hover:text-purple-600 rounded-lg"
+    title="Mark Shipped"
+  >
+    <Truck className="w-4 h-4" />
+  </button>
+
+  {/* Mark Delivered */}
+  <button
+    onClick={() => handleUpdateStatus(order.id, 'delivered')}
+    className="p-2 text-slate-400 hover:text-emerald-600 rounded-lg"
+    title="Mark Delivered"
+  >
+    <CheckCircle className="w-4 h-4" />
+  </button>
+
+  {/* Cancel */}
+  <button
+    onClick={() => handleUpdateStatus(order.id, 'cancelled')}
+    className="p-2 text-slate-400 hover:text-rose-600 rounded-lg"
+    title="Cancel Order"
+  >
+    <Trash2 className="w-4 h-4" />
+  </button>
+
+  {/* Invoice */}
+  <button
+   onClick={() => printInvoice(order)}
+    className="p-2 text-slate-400 hover:text-indigo-600 rounded-lg"
+    title="Print Invoice"
+  >
+    <Printer className="w-4 h-4" />
+  </button>
+</div>
                   </div>
                 </td>
               </tr>

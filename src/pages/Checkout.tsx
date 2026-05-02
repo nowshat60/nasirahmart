@@ -64,7 +64,7 @@ export const Checkout: React.FC = () => {
   const [paymentMethod, setPaymentMethod] =
     useState<'COD' | 'BKASH' | 'CARD'>('COD');
 
-  const [loading, setLoading] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const [couponCode, setCouponCode] =
     useState('');
@@ -198,8 +198,8 @@ const handlePlaceOrder = async () => {
   }
 
   setIsProcessing(true);
+
   try {
-    // ✅ Standardized payload naming
     const orderData = {
       customer_id: user?.id,
       customer_name: shippingDetails.fullName,
@@ -210,25 +210,36 @@ const handlePlaceOrder = async () => {
         quantity: item.quantity
       })),
       subtotal: cartTotal,
-      tax: tax,
-      shipping_fee: shippingFee,
-      total_amount: grandTotal,        // ✅ Send as 'total_amount' (matches PHP expectation)
+      tax,
+      shipping_fee: 50,
+      total_amount: grandTotal,
       payment_method: paymentMethod,
       shipping_address: `${shippingDetails.address}, ${shippingDetails.city}, ${shippingDetails.zipCode}`,
       phone: shippingDetails.phone
     };
 
-    const response = await axios.post('/orders/place_order.php', orderData);
+    const response = await axios.post(
+      'http://localhost/nasirah-mart/api-php/orders/place_order.php',
+      orderData
+    );
 
     if (response.data.success) {
+      setOrderInfo({
+        id: response.data.order_id,
+        deliveryDate: '3-5 Business Days'
+      });
+
       setStep('success');
-      setTimeout(() => clearCart(), 500);
+
+      clearCart();
+
       showToast('Order placed successfully!', 'success');
     } else {
-      showToast(response.data.message || 'Error placing order', 'error');
+      showToast(response.data.message || 'Order failed', 'error');
     }
+
   } catch (error) {
-    console.error('Order Error:', error);
+    console.error(error);
     showToast('Server connection failed!', 'error');
   } finally {
     setIsProcessing(false);
@@ -429,7 +440,7 @@ const handlePlaceOrder = async () => {
                   onClick={
                     handleGatewaySubmit
                   }
-                  disabled={loading}
+                  disabled={isProcessing}
                   className={cn(
                     'flex-[2] py-4 rounded-2xl font-bold text-white',
                     paymentMethod ===
@@ -438,7 +449,7 @@ const handlePlaceOrder = async () => {
                       : 'bg-blue-600'
                   )}
                 >
-                  {loading
+                  {isProcessing
                     ? 'Verifying...'
                     : 'Confirm'}
                 </button>
@@ -757,12 +768,10 @@ const handlePlaceOrder = async () => {
                       }
                     }
                   }}
-                  className="px-8 py-3 bg-emerald-500 text-white rounded-2xl font-bold"
+                  disabled={isProcessing}
+                  className="px-8 py-3 bg-emerald-500 text-white rounded-2xl font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {step ===
-                  'confirmation'
-                    ? 'Place Order'
-                    : 'Continue'}
+                  {isProcessing ? 'Processing...' : (step === 'confirmation' ? 'Place Order' : 'Continue')}
                 </button>
               </div>
             </div>

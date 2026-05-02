@@ -7,10 +7,10 @@ include_once '../db_config.php';
 $orderId = isset($_GET['id']) ? $_GET['id'] : null;
 
 if($orderId){
-    $query = "SELECT o.*, u.firstName, u.lastName, u.email 
-              FROM orders o 
-              JOIN users u ON o.user_id = u.id 
-              WHERE o.id = ?";
+    $query = "SELECT o.*, u.name, u.email
+          FROM orders o
+          LEFT JOIN users u ON o.customer_id = u.id
+          WHERE o.id = ?";
     $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $orderId);
     $stmt->execute();
@@ -18,10 +18,10 @@ if($orderId){
 
     if($row = $result->fetch_assoc()){
         // Fetch items
-        $itemsQuery = "SELECT oi.*, i.item_name 
-                       FROM order_items oi 
-                       JOIN items i ON oi.product_id = i.id 
-                       WHERE oi.order_id = ?";
+        $itemsQuery = "SELECT oi.*, p.name AS item_name
+               FROM order_items oi
+               LEFT JOIN products p ON oi.product_id = p.id
+               WHERE oi.order_id = ?";
         $stmt_items = $conn->prepare($itemsQuery);
         $stmt_items->bind_param("i", $orderId);
         $stmt_items->execute();

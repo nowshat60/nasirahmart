@@ -40,30 +40,27 @@ try {
         $subtotal = $data->subtotal ?? 
                     $data->subTotal ?? 
                     ($totalAmount - ($data->tax ?? 0) - ($data->shipping_fee ?? 0));
-
-        $query = "INSERT INTO orders (
-            customer_id,
-            customer_name,
-            items,
-            subtotal,
-            tax,
-            shipping_fee,
-            total,
-            payment_method,
-            order_status,
-            created_at
-        ) VALUES (
-            :customer_id,
-            :customer_name,
-            :items,
-            :subtotal,
-            :tax,
-            :shipping_fee,
-            :total,
-            :payment_method,
-            'pending',
-            NOW()
-        )";
+$query = "INSERT INTO orders (
+    customer_id,
+    customer_name,
+    items,
+    subtotal,
+    tax,
+    total,
+    payment_method,
+    order_status,
+    created_at
+) VALUES (
+    :customer_id,
+    :customer_name,
+    :items,
+    :subtotal,
+    :tax,
+    :total,
+    :payment_method,
+    'pending',
+    NOW()
+)";
         
         $stmt = $conn->prepare($query);
 
@@ -72,7 +69,6 @@ try {
         $stmt->bindValue(':items', json_encode($data->cart_items));
         $stmt->bindValue(':subtotal', $subtotal);
         $stmt->bindValue(':tax', $data->tax ?? 0);
-        $stmt->bindValue(':shipping_fee', $data->shipping_fee ?? 0);
         // ✅ DB column 'total' receives the calculated total_amount
         $stmt->bindValue(':total', $totalAmount);
         $stmt->bindValue(':payment_method', $data->payment_method ?? 'cod');
@@ -117,14 +113,16 @@ try {
     }
 
 } catch (Exception $e) {
-    if (isset($conn) && $conn->inTransaction()) {
+    if ($conn->inTransaction()) {
         $conn->rollBack();
     }
-    
-    http_response_code(500);
+
     echo json_encode([
-        "success" => false, 
-        "message" => "Database Error: " . $e->getMessage()
+        "status" => "error",
+        "message" => $e->getMessage(),
+        "line" => $e->getLine(),
+        "file" => $e->getFile()
     ]);
+    exit;
 }
 ?>

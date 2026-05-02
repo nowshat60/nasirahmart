@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "code": "VB",
+    "discount": "01",
+    "type": "percentage",
+    "expiry": "2026-03-31",
+    "status": "active",
+    "createdAt": "2026-04-28T08:34:42.407Z",
+    "id": 1777365282425
+  }
+]

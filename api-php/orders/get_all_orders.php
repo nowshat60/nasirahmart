@@ -8,7 +8,9 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
 include_once '../db_config.php';
-
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+header('Content-Type: application/json');
 // ✅ Standardized query with consistent aliases
 $query = "
     SELECT 
@@ -17,15 +19,15 @@ $query = "
         o.customer_id,
         o.subtotal,
         o.tax,
-        o.shipping_fee,
-        o.total AS total_amount,           -- ✅ DB column 'total' aliased as 'total_amount'
+        0 AS shipping_fee,
+        o.total AS total_amount,
         o.order_status AS status,
         o.created_at,
         o.payment_method,
         o.items,
         u.email AS user_email,
-        u.phone AS user_phone,
-        u.address AS user_address
+'' AS user_phone,
+'' AS user_address
     FROM orders o
     LEFT JOIN users u ON o.customer_id = u.id
     ORDER BY o.created_at DESC
